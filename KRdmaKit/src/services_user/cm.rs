@@ -65,6 +65,7 @@ impl Into<ib_gid> for ibv_gid_wrapper {
 pub struct DefaultConnectionManagerHandler {
     pub registered_rc: Arc<Mutex<HashMap<u64, Arc<QueuePair>>>>,
     pub registered_mr: MRWrapper,
+    pub remote_mr: Arc<Mutex<MRInfos>>,
     pub port_num: u8,
     pub ctx: Arc<Context>,
 }
@@ -86,6 +87,7 @@ impl DefaultConnectionManagerHandler {
         Self {
             registered_rc: Arc::new(Default::default()),
             registered_mr: Default::default(),
+            remote_mr: Arc::new(Default::default()),
             port_num,
             ctx: ctx.clone(),
         }
@@ -109,6 +111,11 @@ impl DefaultConnectionManagerHandler {
     #[inline]
     pub fn exp_get_mrs(&self) -> Vec<&MemoryRegion> {
         self.registered_mr.inner.iter().map(|(_, mr)| mr).collect()
+    }
+
+    #[inline]
+    pub fn exp_get_remote_mrs(&self) -> Arc<Mutex<MRInfos>> {
+        Arc::clone(&self.remote_mr)
     }
 
     #[inline]
@@ -188,6 +195,16 @@ impl ConnectionManagerHandler for DefaultConnectionManagerHandler {
         })
     }
 
+    fn handle_send_mr_req(&self, raw: String) -> Result<CMMessage, CMError> {
+        let mrs: MRInfos = serde_json::from_str(raw.as_str())
+            .map_err(|_| CMError::InvalidArg("Failed to do deserialization", "".to_string()))?;
+        self.remote_mr.lock().unwrap().set_inner(mrs.inner);
+        Ok(CMMessage {
+            message_type: CMMessageType::NeverSend,
+            serialized: Default::default(),
+        })
+    }
+
     fn handle_error(&self, _raw: String) -> Result<CMMessage, CMError> {
         return Ok(CMMessage {
             message_type: CMMessageType::NeverSend,
@@ -215,6 +232,11 @@ impl MRInfos {
     #[inline]
     pub fn inner(&self) -> &HashMap<String, MRInfo> {
         &self.inner
+    }
+
+    #[inline]
+    pub fn set_inner(&mut self, inner: HashMap<String, MRInfo>) {
+        self.inner = inner;
     }
 }
 

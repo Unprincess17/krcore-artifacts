@@ -39,6 +39,9 @@ pub trait ConnectionManagerHandler: Send + Sync {
     fn handle_query_mr_req(&self, raw: String) -> Result<CMMessage, CMError> {
         unimplemented!()
     }
+    fn handle_send_mr_req(&self, raw: String) -> Result<CMMessage, CMError> {
+        unimplemented!()
+    }
     fn handle_error(&self, raw: String) -> Result<CMMessage, CMError> {
         unimplemented!()
     }
@@ -70,6 +73,8 @@ pub enum CMMessageType {
 
     RegRCRes,
     QueryMRRes,
+
+    SendMRReq,
 
     Error,
     NeverSend, // Never send back this type of message
@@ -247,6 +252,7 @@ impl<T: ConnectionManagerHandler + 'static> ConnectionManagerServer<T> {
                 CMMessageType::RegRCReq => handler.handle_reg_rc_req(raw),
                 CMMessageType::DeregRCReq => handler.handle_dereg_rc_req(raw),
                 CMMessageType::QueryMRReq => handler.handle_query_mr_req(raw),
+                CMMessageType::SendMRReq => handler.handle_send_mr_req(raw),
                 CMMessageType::UserSlotA => handler.handle_user_slot_a(raw),
                 CMMessageType::UserSlotB => handler.handle_user_slot_b(raw),
                 CMMessageType::UserSlotC => handler.handle_user_slot_c(raw),
@@ -262,6 +268,11 @@ impl<T: ConnectionManagerHandler + 'static> ConnectionManagerServer<T> {
 
     pub fn handler(&self) -> &T {
         &self.handler
+    }
+
+    #[inline]
+    pub fn into_handler(self) -> T {
+        self.handler
     }
 }
 
