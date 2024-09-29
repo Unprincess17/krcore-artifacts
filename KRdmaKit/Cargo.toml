@@ -12,7 +12,7 @@ nostd_async = "0.3.1"
 futures-micro = "0.4"
 ## spinlock
 spin = "0.9.2"                                                                             ## spin lock
-hashbrown = { git = "https://github.com/ProjectMitosisOS/hashbrown.git", branch = "main" }
+hashbrown ="0.14"
 thiserror-no-std = "2.0.2"
 delegate = "*"
 tokio = { version = "1.20.1", optional = true, features = ["full"] }

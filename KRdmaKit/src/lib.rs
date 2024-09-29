@@ -2,7 +2,7 @@
 #![allow(non_snake_case)]
 #![feature(
     get_mut_unchecked,
-    new_uninit,
+    new_zeroed_alloc,
     allocator_api,
     trusted_random_access,
     stmt_expr_attributes,
