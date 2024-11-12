@@ -220,6 +220,34 @@ impl QueuePair {
         Ok(data)
     }
 
+    pub fn send_mr_info(&self, mr_infos: MRInfos) -> Result<MRInfos, ControlpathError> {
+        let addr = match self.comm {
+            None => {
+                return Err(ControlpathError::CreationError(
+                    "None value on `comm`",
+                    Error::from_kernel_errno(0),
+                ))
+            }
+            Some(comm) => comm.addr,
+        };
+        let mut stream = std::net::TcpStream::connect(addr).map_err(|_| {
+            ControlpathError::CreationError("Failed to connect server", Error::from_kernel_errno(0))
+        })?;
+
+        let serialized = serde_json::to_string(&mr_infos).unwrap();
+
+        let req = CMMessage {
+            message_type: CMMessageType::SendMRReq,
+            serialized,
+        };
+
+        let _ = then_send_sync(&mut stream, req).map_err(|_| {
+            ControlpathError::CreationError("Failed to send message", Error::from_kernel_errno(0))
+        })?;
+
+        Ok(mr_infos)
+    }
+
     #[inline]
     pub fn comm_struct(&self) -> Option<CommStruct> {
         self.comm
