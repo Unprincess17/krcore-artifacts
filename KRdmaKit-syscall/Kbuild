@@ -2,7 +2,8 @@ obj-m := KRdmaKitSyscall.o
 KRdmaKitSyscall-objs := KRdmaKitSyscall.rust.o
 
 CARGO ?= cargo
-TARGET ?= x86_64-unknown-none-linuxkernel
+TARGET ?= x86_64-unknown-linux-gnu
+# TARGET ?= x86_64-unknown-none-linuxkernel
 
 export c_flags
 
