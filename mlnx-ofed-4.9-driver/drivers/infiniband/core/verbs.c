@@ -1171,7 +1171,7 @@ static struct ib_qp *create_xrc_qp_user(struct ib_qp *qp,
 	return qp;
 }
 
-print_qp_init_attr(struct ib_qp_init_attr* init_attr)
+static void print_qp_init_attr(struct ib_qp_init_attr* init_attr)
 {
   printk(KERN_INFO,
          "check [ib_qp_init_attr] in ib_create_user "
